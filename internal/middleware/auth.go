@@ -14,6 +14,7 @@ func BearerAuth(validToken string) gin.HandlerFunc {
 		if authHeader == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Authorization header required",
+				"code":  400,
 			})
 			c.Abort()
 			return
@@ -22,6 +23,7 @@ func BearerAuth(validToken string) gin.HandlerFunc {
 		if !strings.HasPrefix(authHeader, "Bearer ") {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid authorization format. Use: Bearer <token>",
+				"code":  400,
 			})
 			c.Abort()
 			return
@@ -32,6 +34,7 @@ func BearerAuth(validToken string) gin.HandlerFunc {
 		if token == "" {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Token is required",
+				"code":  401,
 			})
 			c.Abort()
 			return
@@ -40,6 +43,7 @@ func BearerAuth(validToken string) gin.HandlerFunc {
 		if token != validToken {
 			c.JSON(http.StatusUnauthorized, gin.H{
 				"error": "Invalid token",
+				"code":  401,
 			})
 			c.Abort()
 			return
@@ -57,6 +61,7 @@ func ValidateHeaders() gin.HandlerFunc {
 			if contentType != "application/json" && !strings.HasPrefix(contentType, "application/json;") {
 				c.JSON(http.StatusUnsupportedMediaType, gin.H{
 					"error": "Content-Type must be application/json",
+					"code":  415,
 				})
 				c.Abort()
 				return
@@ -67,6 +72,7 @@ func ValidateHeaders() gin.HandlerFunc {
 		if accept != "" && accept != "*/*" && !strings.Contains(accept, "application/json") {
 			c.JSON(http.StatusNotAcceptable, gin.H{
 				"error": "Accept header must include application/json",
+				"code":  406,
 			})
 			c.Abort()
 			return

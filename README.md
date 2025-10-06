@@ -539,6 +539,7 @@ Health check endpoint.
 
 
 **Authentication Errors**:
+- `400 Bad Request`: Invalid request: address field is required
 - `401 Unauthorized`: Token missing, invalid or malformed
 - `415 Unsupported Media Type`: Content-Type incorrect
 - `406 Not Acceptable`: Accept header does not include application/json

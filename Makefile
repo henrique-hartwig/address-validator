@@ -12,7 +12,7 @@ test:
 test-unit:
 	go test -v -short ./...
 
-test-cache:
+test-integration:
 	go test -v ./internal/services/ -run TestCache
 
 test-coverage:
