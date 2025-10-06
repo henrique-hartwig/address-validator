@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - address-validator-network
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - API_TOKEN=${API_TOKEN}
+      - GEOCODING_A_API_KEY=${GEOCODING_A_API_KEY}
+      - GEOCODING_A_BASE_URL=${GEOCODING_A_BASE_URL}
+      - GEOCODING_B_API_KEY=${GEOCODING_B_API_KEY}
+      - GEOCODING_B_BASE_URL=${GEOCODING_B_BASE_URL}
+      - CACHE_TTL=24h
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=
+      - REDIS_DB=0
+      - ENVIRONMENT=development
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - address-validator-network
+
+volumes:
+  redis-data:
+
+networks:
+  address-validator-network:
+    driver: bridge
+
+
+
