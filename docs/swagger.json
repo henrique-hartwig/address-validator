@@ -1,0 +1,196 @@
+{
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "API to validate and normalize addresses in free-form text with automatic typo corrections.\nThe API accepts addresses entered naturally by the user and returns normalized components.",
+        "title": "Address Validator API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:3000",
+    "basePath": "/api/v1",
+    "paths": {
+        "/health": {
+            "get": {
+                "description": "Check if the service is working",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/validate-address": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Receives a free-form address, corrects typos automatically and returns the normalized components",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "address"
+                ],
+                "summary": "Validate and normalize an address",
+                "parameters": [
+                    {
+                        "description": "Address to validate",
+                        "name": "address",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.ValidateAddressRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.ValidateAddressResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.ValidateAddressResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized - Invalid or missing token",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "415": {
+                        "description": "Unsupported Media Type - Content-Type must be application/json",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.ValidateAddressResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "models.AddressData": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string",
+                    "example": "San Francisco"
+                },
+                "country": {
+                    "type": "string",
+                    "example": "United States"
+                },
+                "county": {
+                    "type": "string",
+                    "example": "San Francisco County"
+                },
+                "formatted": {
+                    "type": "string",
+                    "example": "123 Main Street, San Francisco, CA 94102"
+                },
+                "number": {
+                    "type": "string",
+                    "example": "123"
+                },
+                "postal_code": {
+                    "type": "string",
+                    "example": "94102"
+                },
+                "state": {
+                    "type": "string",
+                    "example": "CA"
+                },
+                "street": {
+                    "type": "string",
+                    "example": "Main Street"
+                }
+            }
+        },
+        "models.ValidateAddressRequest": {
+            "type": "object",
+            "required": [
+                "address"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string",
+                    "example": "123 Main Stret, San Fransisco, CA, 94102"
+                }
+            }
+        },
+        "models.ValidateAddressResponse": {
+            "type": "object",
+            "properties": {
+                "corrections": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "Stret → street (typo correction)",
+                        "Fransisco → francisco (city correction)"
+                    ]
+                },
+                "data": {
+                    "$ref": "#/definitions/models.AddressData"
+                },
+                "error": {
+                    "type": "string",
+                    "example": "Failed to validate address"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "success"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "BearerAuth": {
+            "description": "Enter 'Bearer' followed by your token. Example: Bearer your_token_here",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

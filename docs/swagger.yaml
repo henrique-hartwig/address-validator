@@ -1,0 +1,135 @@
+basePath: /api/v1
+consumes:
+- application/json
+definitions:
+  models.AddressData:
+    properties:
+      city:
+        example: San Francisco
+        type: string
+      country:
+        example: United States
+        type: string
+      county:
+        example: San Francisco County
+        type: string
+      formatted:
+        example: 123 Main Street, San Francisco, CA 94102
+        type: string
+      number:
+        example: "123"
+        type: string
+      postal_code:
+        example: "94102"
+        type: string
+      state:
+        example: CA
+        type: string
+      street:
+        example: Main Street
+        type: string
+    type: object
+  models.ValidateAddressRequest:
+    properties:
+      address:
+        example: 123 Main Stret, San Fransisco, CA, 94102
+        type: string
+    required:
+    - address
+    type: object
+  models.ValidateAddressResponse:
+    properties:
+      corrections:
+        example:
+        - Stret → street (typo correction)
+        - Fransisco → francisco (city correction)
+        items:
+          type: string
+        type: array
+      data:
+        $ref: '#/definitions/models.AddressData'
+      error:
+        example: Failed to validate address
+        type: string
+      status:
+        example: success
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: |-
+    API to validate and normalize addresses in free-form text with automatic typo corrections.
+    The API accepts addresses entered naturally by the user and returns normalized components.
+  title: Address Validator API
+  version: "1.0"
+paths:
+  /health:
+    get:
+      description: Check if the service is working
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /validate-address:
+    post:
+      consumes:
+      - application/json
+      description: Receives a free-form address, corrects typos automatically and
+        returns the normalized components
+      parameters:
+      - description: Address to validate
+        in: body
+        name: address
+        required: true
+        schema:
+          $ref: '#/definitions/models.ValidateAddressRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.ValidateAddressResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ValidateAddressResponse'
+        "401":
+          description: Unauthorized - Invalid or missing token
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "415":
+          description: Unsupported Media Type - Content-Type must be application/json
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ValidateAddressResponse'
+      security:
+      - BearerAuth: []
+      summary: Validate and normalize an address
+      tags:
+      - address
+produces:
+- application/json
+securityDefinitions:
+  BearerAuth:
+    description: 'Enter ''Bearer'' followed by your token. Example: Bearer your_token_here'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
