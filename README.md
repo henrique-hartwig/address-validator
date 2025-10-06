@@ -558,4 +558,4 @@ Health check endpoint.
 ## Additional Documentation
 
 - **[RUN.md](RUN.md)**: Complete guide to execute, test and deploy the application
-- **[PROMPT.go](PROMPT.go)**: Used prompts using Cursor to get speed and help to decide some technical and architectural decisions
+- **[PROMPT.md](PROMPT.md)**: Used prompts using Cursor to get speed and help to decide some technical and architectural decisions
